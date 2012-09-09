@@ -45,6 +45,9 @@ object LmMcmc {
       println("sigma is symmetric: " + isSymmetricMatrix(sigma))
       println("sigma is approximately symmetric: " + isApproxSymmetricMatrix(sigma))
       
+      makeSymmetric(sigma)
+      println("sigma is symmetric (after makeSymmetric): " + isSymmetricMatrix(sigma))
+      
       beta = rmvnorm(mu, sigma) // this is returning an error because sigma is not recognized as symmetric
       println(beta)
     }
@@ -91,6 +94,12 @@ object LmMcmc {
 	    (0 until i).forall(j =>
 	      if((mat(i,j) - mat(j,i)).abs < 0.1) true
 	      else{ println("approx check: (%s,%s) %s != (%s,%s) %s".format(i,j,mat(i,j),j,i,mat(j,i))); false}))
+  }
+  
+  def makeSymmetric[V](mat: Matrix[V]) = {
+    assert(isSquareMatrix(mat))
+	for(i <- 0 until mat.rows; j<- 0 until i)
+	  mat(i,j) = mat(j,i)
   }
 
 }
