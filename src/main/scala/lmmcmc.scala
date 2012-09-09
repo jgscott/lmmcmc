@@ -31,6 +31,8 @@ object LmMcmc {
     
     // Some things that are usefully pre-computed
     val xtx = x.t * x // Problem: breeze doesn't think this matrix is symmetric
+    println("xtx is symmetric: " + isSymmetricMatrix(xtx))
+    
     val xty = x.t * y
     
     for(i <- 1 to nmc) {
@@ -38,6 +40,11 @@ object LmMcmc {
       precision *= 1.0/sigma2
       val mu = xtx * xty // Right now this is effort wasted inside the loop, but want to keep this structure
       val sigma = inv(precision)
+      
+      for(row <- 0 until sigma.rows) println(sigma(row, ::).valuesIterator.map(x => "%25s".format(x)).mkString(" "))
+      println("sigma is symmetric: " + isSymmetricMatrix(sigma))
+      println("sigma is approximately symmetric: " + isApproxSymmetricMatrix(sigma))
+      
       beta = rmvnorm(mu, sigma) // this is returning an error because sigma is not recognized as symmetric
       println(beta)
     }
@@ -61,4 +68,29 @@ object LmMcmc {
         val betafinal = mcmc(y, x, 1000)
     }
   }
+  
+  /////////////
+  
+  def isSquareMatrix[V](mat: Matrix[V]) =
+    mat.rows == mat.cols
+
+  def isSymmetricMatrix[V](mat: Matrix[V]) = {
+    if(!isSquareMatrix(mat))
+      false
+	else
+	  (0 until mat.rows).forall(i =>
+	    (0 until i).forall(j =>
+	      mat(i,j) == mat(j,i)))
+  }
+
+  def isApproxSymmetricMatrix(mat: Matrix[Double]) = {
+    if(!isSquareMatrix(mat))
+      false
+	else
+	  (0 until mat.rows).forall(i =>
+	    (0 until i).forall(j =>
+	      if((mat(i,j) - mat(j,i)).abs < 0.1) true
+	      else{ println("approx check: (%s,%s) %s != (%s,%s) %s".format(i,j,mat(i,j),j,i,mat(j,i))); false}))
+  }
+
 }
