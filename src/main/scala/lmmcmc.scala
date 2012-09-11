@@ -19,6 +19,7 @@ object LmMcmc {
     val beta = DenseVector.fill(nfeatures)(scala.util.Random.nextGaussian())
     val eps = DenseVector.fill(nobs)(scala.util.Random.nextGaussian())
     eps *= sqrt(sigma2)
+    println("true beta " + beta)
     (x*beta+eps,x)
   }
   
@@ -35,12 +36,12 @@ object LmMcmc {
     
     for(i <- 1 to nmc) {
       val precision = xtx
-      precision *= 1.0/sigma2
-      val mu = xtx * xty // Right now this is effort wasted inside the loop, but want to keep this structure
       val sigma = inv(precision)
+      val mu = sigma * xty // Right now this is effort wasted inside the loop, but want to keep this structure
+      sigma *= 1.0/sigma2
       makeSymmetric(sigma)
       beta = rmvnorm(mu, sigma)
-      println(beta)
+      println("samp beta " + beta)
     }
     beta
   }
@@ -59,7 +60,7 @@ object LmMcmc {
 
       case Seq("test", nobs, nfeatures) =>
         val (y, x) = generate(nobs.toInt, nfeatures.toInt)
-        val betafinal = mcmc(y, x, 1000)
+        val betafinal = mcmc(y, x, 100)
     }
   }
   
