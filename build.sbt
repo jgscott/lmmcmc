@@ -9,5 +9,6 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalanlp" % "breeze-learn_2.9.2" % "0.2-SNAPSHOT" changing() withSources()
+  "org.scalanlp" % "breeze-learn_2.9.2" % "0.2-SNAPSHOT" changing() withSources(),
+  "net.sourceforge.parallelcolt" % "parallelcolt" % "0.10.0"
 )

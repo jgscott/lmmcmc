@@ -12,6 +12,7 @@ import scala.util.Random
 import breeze.stats._
 import breeze.linalg._
 
+
 object LmMcmc { 
     
   def generate(nobs: Int, nfeatures: Int, sigma2: Double = 1.0) = {
@@ -34,6 +35,7 @@ object LmMcmc {
     val xtx = x.t * x
     val xty = x.t * y
     
+    writeUsing("betaout.txt"){f => 
     for(i <- 1 to nmc) {
       val precision = xtx
       val sigma = inv(precision)
@@ -41,7 +43,8 @@ object LmMcmc {
       sigma *= 1.0/sigma2
       makeSymmetric(sigma)
       beta = rmvnorm(mu, sigma)
-      println("samp beta " + beta)
+      f.write(beta.valuesIterator.mkString(" ") + "\n")
+    }
     }
     beta
   }
@@ -92,6 +95,24 @@ object LmMcmc {
     assert(isSquareMatrix(mat))
 	for(i <- 0 until mat.rows; j<- 0 until i)
 	  mat(i,j) = mat(j,i)
+  }
+  
+ 
+   def using[T <: { def close() }, R](resource: T)(block: T => R): R = {
+    try {
+      block(resource)
+    }
+    finally {
+      if (resource != null) resource.close()
+    }
+  }
+
+  /**
+   * Open a file for writing, execute a block of code, and ensure that the
+   * file is closed when finished.
+   */
+  def writeUsing[R](filename: String)(block: BufferedWriter => R): R = {
+    using(new BufferedWriter(new FileWriter(filename)))(block)
   }
 
 }
